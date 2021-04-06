@@ -8,6 +8,13 @@ namespace EasyDutyAnnouncementBot.BL.Bot.Commands
     {
         public async override Task Execute(TelegramBotClient client, Message message)
         {
+            var commands = DutyBot.Commands;
+
+            foreach (var command in commands)
+            {
+                command.Cancel();
+            }
+
             await client.SendTextMessageAsync(message.Chat.Id,
                 "Выполнение последней команды отменено.");
             LastStatus = CommandStatus.Success;

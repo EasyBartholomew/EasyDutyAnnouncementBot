@@ -156,8 +156,10 @@
     <Compile Include="App_Start\RouteConfig.cs" />
     <Compile Include="App_Start\WebApiConfig.cs" />
     <Compile Include="BL\Bot\Commands\AddCommand.cs" />
-    <Compile Include="BL\Bot\Commands\AddListCommand.cs" />
     <Compile Include="BL\Bot\Commands\ArgCommand.cs" />
+    <Compile Include="BL\Bot\Commands\AssociateCommand.cs" />
+    <Compile Include="BL\Bot\Commands\ChangeCommand.cs" />
+    <Compile Include="BL\Bot\Commands\ForceOneCommand.cs" />
     <Compile Include="BL\Bot\Commands\CancelCommand.cs" />
     <Compile Include="BL\Bot\Commands\Command.cs" />
     <Compile Include="BL\Bot\Commands\CommandStatus.cs" />
@@ -166,7 +168,6 @@
     <Compile Include="BL\Bot\Commands\ExcludeCommand.cs" />
     <Compile Include="BL\Bot\Commands\HelloCommand.cs" />
     <Compile Include="BL\Bot\Commands\MakeCommand.cs" />
-    <Compile Include="BL\Bot\Commands\MakeListCommand.cs" />
     <Compile Include="BL\Bot\Commands\NextCommand.cs" />
     <Compile Include="BL\Bot\Commands\HelpCommand.cs" />
     <Compile Include="BL\Bot\Commands\PushCommand.cs" />
@@ -174,13 +175,18 @@
     <Compile Include="BL\Bot\Commands\ListCommand.cs" />
     <Compile Include="BL\Bot\Commands\SetCommand.cs" />
     <Compile Include="BL\Bot\Commands\StartCommand.cs" />
+    <Compile Include="BL\Bot\Commands\StudentTextArgCommand.cs" />
     <Compile Include="BL\Bot\Commands\TextArgCommand.cs" />
     <Compile Include="BL\Bot\Commands\TextListArgCommand.cs" />
     <Compile Include="BL\Bot\Commands\TripleDotCommand.cs" />
+    <Compile Include="BL\Bot\Commands\WhenCommand.cs" />
+    <Compile Include="BL\Bot\Commands\WhoCommand.cs" />
     <Compile Include="BL\Bot\DutyBot.cs" />
     <Compile Include="BL\Bot\Group.cs" />
     <Compile Include="BL\Bot\InvalidIdException.cs" />
-    <Compile Include="BL\Models\DutyQueue.cs" />
+    <Compile Include="BL\Models\CollisionException.cs" />
+    <Compile Include="BL\Models\CustomQueue.cs" />
+    <Compile Include="BL\Models\DateTimeHelper.cs" />
     <Compile Include="BL\Models\NoInstanceException.cs" />
     <Compile Include="BL\Models\Platoon.cs" />
     <Compile Include="BL\Models\Student.cs" />
@@ -202,7 +208,6 @@
     <Resource Include="Resources\commands.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Resource>
-    <Content Include="favicon.ico" />
     <Content Include="Global.asax" />
     <Content Include="Web.config" />
     <Content Include="Web.Debug.config">

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Runtime.Serialization;
 using EasyDutyAnnouncementBot.BL.Models;
 using EasyDutyAnnouncementBot.BL.Bot.Commands;
@@ -16,12 +17,13 @@ namespace EasyDutyAnnouncementBot.BL.Bot
         public UInt64 ChatId => _chatId;
 
         [IgnoreDataMember]
-        public Command LastCommand { get; set; }
+        public Dictionary<int, Command> LastCommand { get; set; }
 
         public Group(UInt64 chatId, Platoon platoon)
         {
             _chatId = chatId;
             _platoon = platoon;
+            LastCommand = new Dictionary<int, Command>();
         }
 
         [DataMember(IsRequired = true)]

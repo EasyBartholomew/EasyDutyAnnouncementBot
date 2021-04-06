@@ -63,7 +63,7 @@ namespace EasyDutyAnnouncementBot.BL
                 {
                     group = dataContractSerializer.ReadObject(xmlReader) as Group;
                 }
-
+               
                 return group;
             }
             catch (Exception)
@@ -113,7 +113,7 @@ namespace EasyDutyAnnouncementBot.BL
 
             if (!File.Exists(path))
                 return false;
-                        
+
             document.Load(path);
 
             var token = document.GetElementsByTagName("token")[0].InnerText;
@@ -132,7 +132,7 @@ namespace EasyDutyAnnouncementBot.BL
                 {
                     typeof(Student),
                     typeof(Platoon),
-                    typeof(DutyQueue)
+                    typeof(CustomQueue)
                 });
         }
 

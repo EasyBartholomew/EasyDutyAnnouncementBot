@@ -6,12 +6,12 @@ using Telegram.Bot.Types;
 
 namespace EasyDutyAnnouncementBot.BL.Bot.Commands
 {
-    public class SetCommand : TextArgCommand
+    public class SetCommand : StudentTextArgCommand
     {
         public async override Task Execute(TelegramBotClient client, Message message)
         {
             await client.SendTextMessageAsync(message.Chat.Id,
-                "Пришли фамилию того, кого нужно перенести))");
+                "Пришли студента, которого нужно установить дежурным)");
 
             LastStatus = CommandStatus.AwaitNextMessage;
         }
@@ -19,7 +19,7 @@ namespace EasyDutyAnnouncementBot.BL.Bot.Commands
         public async override Task OnTextDataError(TelegramBotClient client, Message message)
         {
             await client.SendTextMessageAsync(message.Chat.Id,
-                   "В качестве фамилии можно отправить только текст)");
+                   "В качестве студента можно отправить только текст)");
 
             LastStatus = CommandStatus.AwaitNextMessage;
         }
@@ -36,7 +36,7 @@ namespace EasyDutyAnnouncementBot.BL.Bot.Commands
 
             try
             {
-                queue.SetCurrentDuty(Data);
+                queue.SetCurrent(Student.ToString());
             }
             catch (Exception ex)
             {
@@ -52,5 +52,9 @@ namespace EasyDutyAnnouncementBot.BL.Bot.Commands
 
             LastStatus = CommandStatus.Success;
         }
+
+        public SetCommand() : base(false)
+        { }
+
     }
 }

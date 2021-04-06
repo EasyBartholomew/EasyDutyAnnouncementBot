@@ -7,12 +7,12 @@ using Telegram.Bot.Types;
 
 namespace EasyDutyAnnouncementBot.BL.Bot.Commands
 {
-    public class ExcludeCommand : TextArgCommand
+    public class ExcludeCommand : StudentTextArgCommand
     {
         public async override Task Execute(TelegramBotClient client, Message message)
         {
             await client.SendTextMessageAsync(message.Chat.Id,
-                "Пришли фамилию того, кого надо исключить из списка)");
+                "Пришли студента, которого надо исключить из списка)");
 
             LastStatus = CommandStatus.AwaitNextMessage;
         }
@@ -20,7 +20,7 @@ namespace EasyDutyAnnouncementBot.BL.Bot.Commands
         public async override Task OnTextDataError(TelegramBotClient client, Message message)
         {
             await client.SendTextMessageAsync(message.Chat.Id,
-                    "В качестве фамилии можно отправить только текст)");
+                    "В студента можно отправить только текст)");
 
             LastStatus = CommandStatus.AwaitNextMessage;
         }
@@ -38,13 +38,17 @@ namespace EasyDutyAnnouncementBot.BL.Bot.Commands
             if (Data.Trim().ToLower() == "all")
             {
                 platoon.DutyQueue.ExcludeAll();
+
+                await client.SendTextMessageAsync(message.Chat.Id,
+                   "Все студенты были исключены из списка дежурных)\nТеперь список дежурных пуст!");
+
                 LastStatus = CommandStatus.Success;
                 return;
             }
 
             try
             {
-                queue.Exclude(Data);
+                queue.Exclude(Student.ToString());
             }
             catch (Exception ex)
             {
@@ -55,7 +59,7 @@ namespace EasyDutyAnnouncementBot.BL.Bot.Commands
                 return;
             }
 
-            var exStudent = platoon.Students.First(s => s.RecognizeSelf(Data));
+            var exStudent = platoon.GetStudent(Data);
 
             await client.SendTextMessageAsync(message.Chat.Id,
                    $"Студент {exStudent} исключён из списка дежурных.");

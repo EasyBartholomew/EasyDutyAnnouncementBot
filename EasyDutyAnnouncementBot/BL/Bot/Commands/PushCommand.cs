@@ -7,7 +7,7 @@ using Telegram.Bot.Types;
 
 namespace EasyDutyAnnouncementBot.BL.Bot.Commands
 {
-    class PushCommand : TextArgCommand
+    class PushCommand : StudentTextArgCommand
     {
         public async override Task Execute(TelegramBotClient client, Message message)
         {
@@ -21,7 +21,7 @@ namespace EasyDutyAnnouncementBot.BL.Bot.Commands
         public async override Task OnTextDataError(TelegramBotClient client, Message message)
         {
             await client.SendTextMessageAsync(message.Chat.Id,
-                    "В качестве фамилии можно отправить только текст)");
+                    "В качестве студента можно отправить только текст)");
             LastStatus = CommandStatus.AwaitNextMessage;
         }
 
@@ -35,27 +35,9 @@ namespace EasyDutyAnnouncementBot.BL.Bot.Commands
 
             var queue = platoon.DutyQueue;
 
-            var splitArgs = Data.Split(new char[] { ',', ';' },
-                StringSplitOptions.RemoveEmptyEntries);
-
-            if ((splitArgs.Length < 1) || (splitArgs.Length > 2))
-            {
-                await client.SendTextMessageAsync(message.Chat.Id,
-                    "Передано неверное число аргументов.\n" +
-                    "Допустимый синтаксис: \"Фамилия\", количество раз; \"Фамилия\"");
-                LastStatus = CommandStatus.AwaitNextMessage;
-                return;
-            }
-
-            var surname = splitArgs.First();
-            var success = UInt32.TryParse(splitArgs.Last(), out uint count);
-
             try
             {
-                if ((splitArgs.Length == 2) && success && (count != 0))
-                    queue.PushCurrentDuty(surname, count);
-                else
-                    queue.PushCurrentDuty(surname);
+                queue.PushCurrent(Student.ToString());
             }
             catch (Exception ex)
             {

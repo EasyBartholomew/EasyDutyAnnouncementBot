@@ -27,12 +27,16 @@ namespace EasyDutyAnnouncementBot.BL.Models
         [DataMember]
         public StudentRank Rank { get; set; }
 
+        [DataMember(IsRequired = false)]
+        public Int32 UserId { get; set; }
+
         public bool RecognizeSelf(string privateData)
         {
             var splitData = privateData.Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
 
             if (splitData.Length == 1)
-                return this.Surname == FormatPrivateData(privateData);
+                return (this.Surname == FormatPrivateData(privateData)) ||
+                    (this.Name == FormatPrivateData(privateData));
 
             if (splitData.Length == 2)
             {

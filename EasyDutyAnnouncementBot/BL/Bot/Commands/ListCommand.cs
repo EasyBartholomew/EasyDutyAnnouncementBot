@@ -18,26 +18,28 @@ namespace EasyDutyAnnouncementBot.BL.Bot.Commands
             if (platoon == null)
                 throw new InvalidIdException("Взаимодействие с данной группой не было инициировано.");
 
-            if (platoon.Students.Count == 0)
+            if (platoon.Count() == 0)
             {
                 await client.SendTextMessageAsync(message.Chat.Id,
-                    "Список студентов пуст.");
+                    "Список студентов пуст!");
             }
             else
             {
-                var sb = new StringBuilder();
-                var list = platoon.Students.Select(s => s.ToString());
+                var list = platoon.Select(s => s.ToString()).ToArray();
+                var sb = new StringBuilder("<b>Личный состав:</b>\n\n");
 
-                foreach (var student in list)
+                for (var i = 0; i < list.Length; i++)
                 {
-                    sb.Append(student);
-                    sb.Append(";\n");
+                    sb.Append(i + 1)
+                    .Append(". ")
+                    .Append(list[i])
+                    .Append(";\n");
                 }
 
                 sb.Remove(sb.Length - 2, 2);
                 sb.Append('.');
 
-                await client.SendTextMessageAsync(message.Chat.Id, sb.ToString());
+                await client.SendTextMessageAsync(message.Chat.Id, sb.ToString(), ParseMode.Html);
             }
 
             LastStatus = CommandStatus.Success;

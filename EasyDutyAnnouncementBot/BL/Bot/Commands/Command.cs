@@ -20,6 +20,14 @@ namespace EasyDutyAnnouncementBot.BL.Bot.Commands
 
         public abstract Task Execute(TelegramBotClient client, Message message);
 
+        public void Cancel()
+        {
+            this.OnCancel();
+        }
+
+        public virtual void OnCancel()
+        { }
+
         public virtual async Task<bool> CanExecute(TelegramBotClient client, Message message)
         {
             var sender = await client.GetChatMemberAsync(message.Chat.Id, message.From.Id);

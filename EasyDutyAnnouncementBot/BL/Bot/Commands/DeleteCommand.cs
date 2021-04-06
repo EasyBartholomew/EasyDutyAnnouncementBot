@@ -1,20 +1,17 @@
 ﻿using System;
-using System.Linq;
 using System.Threading.Tasks;
 using Telegram.Bot;
 using Telegram.Bot.Types;
-using Telegram.Bot.Types.Enums;
 using EasyDutyAnnouncementBot.BL.Models;
-using System.Collections.Generic;
 
 namespace EasyDutyAnnouncementBot.BL.Bot.Commands
 {
-    public class DeleteCommand : TextArgCommand
+    public class DeleteCommand : StudentTextArgCommand
     {
         public async override Task Execute(TelegramBotClient client, Message message)
         {
             await client.SendTextMessageAsync(message.Chat.Id,
-                "Введи фамилию того, кого нужно исключить из списка студентов)\n" +
+                "Пришли студента, кого нужно исключить из списка студентов)\n" +
                 "(данный человек будет также исключён из списка дежурных)");
 
             LastStatus = CommandStatus.AwaitNextMessage;
@@ -32,16 +29,7 @@ namespace EasyDutyAnnouncementBot.BL.Bot.Commands
             {
                 platoon.RemoveAll();
 
-                LastStatus = CommandStatus.Success;
-                return;
-            }
-
-            var student = platoon.Students.FirstOrDefault(s => s.RecognizeSelf(Data));
-
-            if (student == null)
-            {
-                await client.SendTextMessageAsync(message.Chat.Id,
-                    $"Студент \"{Data}\" отсутсвует в списке студентов!");
+                await client.SendTextMessageAsync(chatId, "Все студенты были удалены из списка!");
 
                 LastStatus = CommandStatus.Success;
                 return;
@@ -49,14 +37,19 @@ namespace EasyDutyAnnouncementBot.BL.Bot.Commands
 
             try
             {
-                platoon.DutyQueue.Exclude(Data);
-                platoon.RemoveStudent(Data);
+                platoon.RemoveStudent(Student.ToString());
             }
-            catch (Exception)
-            { }
+            catch (Exception ex)
+            {
+                await client.SendTextMessageAsync(message.Chat.Id,
+                  ex.Message);
+
+                LastStatus = CommandStatus.Success;
+                return;
+            }
 
             await client.SendTextMessageAsync(message.Chat.Id,
-                $"Студент {Data} был успешно исключен.");
+                $"Студент {Student} был успешно исключен.");
 
             LastStatus = CommandStatus.Success;
         }
@@ -64,7 +57,7 @@ namespace EasyDutyAnnouncementBot.BL.Bot.Commands
         public async override Task OnTextDataError(TelegramBotClient client, Message message)
         {
             await client.SendTextMessageAsync(message.Chat.Id,
-                    "В качестве фамилии можно отправить только текст)");
+                    "В качестве студента можно отправить только текст)");
 
             LastStatus = CommandStatus.AwaitNextMessage;
         }

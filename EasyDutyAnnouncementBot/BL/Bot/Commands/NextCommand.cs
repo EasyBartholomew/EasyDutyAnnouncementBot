@@ -19,7 +19,7 @@ namespace EasyDutyAnnouncementBot.BL.Bot.Commands
 
             try
             {
-                queue.PopCurrentDuty();
+                queue.PopCurrent();
 
                 await client.SendTextMessageAsync(message.Chat.Id,
                     $"Хорошо теперь дежурит {queue.GetCurrentDuty()}.");

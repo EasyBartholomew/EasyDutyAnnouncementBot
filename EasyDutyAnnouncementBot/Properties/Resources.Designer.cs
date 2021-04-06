@@ -60,21 +60,8 @@ namespace EasyDutyAnnouncementBot.Properties {
             }
         }
         
-        /// <summary>
-        ///   Looks up a localized string similar to current - узнать кто сейчас дежурит
-        ///dutylist - показать список дежурных
-        ///help - получить список доступных команд
-        ///next - установить дежурным следующего
-        ///set - уcтановить дежурным студента
-        ///push - установить дежурным студента принудительно
-        ///add - добавить студента в список дежурных
-        ///addlist - добавить список студентов в список дежурных
-        ///exclude - исключить студента из списка дежурных
-        ///delete - исключить из списка студентов
-        ///list - показать список добавленных студентов
-        ///cancel - отменить выполнение последней [rest of string was truncated]&quot;;.
-        /// </summary>
-        internal static string commands {
+
+        internal static string Сommands {
             get {
                 return ResourceManager.GetString("commands", resourceCulture);
             }

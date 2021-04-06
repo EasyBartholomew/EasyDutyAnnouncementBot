@@ -19,12 +19,17 @@ namespace EasyDutyAnnouncementBot.BL.Bot.Commands
             return base.CanExecute(client, message);
         }
 
-        public void SendData(TelegramBotClient client, Message message)
+        public async Task SendData(TelegramBotClient client, Message message)
         {
-            if (this.CheckLastUserId && (this.LastUserId == message.From.Id))
-                TakeData(client, message);
+            if (this.CheckLastUserId)
+            {
+                if (this.LastUserId == message.From.Id)
+                    await TakeData(client, message);
+            }
             else
-                TakeData(client, message);
+            {
+                await TakeData(client, message);
+            }
         }
 
         public abstract Task TakeData(TelegramBotClient client, Message message);

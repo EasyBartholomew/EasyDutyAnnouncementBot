@@ -2,6 +2,9 @@
 using System.Linq;
 using System.Collections.Generic;
 using Telegram.Bot;
+using Telegram.Bot.Args;
+using Telegram.Bot.Types;
+using Telegram.Bot.Types.Enums;
 using EasyDutyAnnouncementBot.BL.Models;
 using EasyDutyAnnouncementBot.BL.Bot.Commands;
 
@@ -26,10 +29,10 @@ namespace EasyDutyAnnouncementBot.BL.Bot
         public static Group CreateGroupFor(long chatId)
         {
             if (IsKnownChatId(chatId))
-                throw new ArgumentException(); //Add description here
+                throw new InvalidOperationException("Данная группа уже была инициализированна!");
 
             if (Groups.Count == MAX_GROUPS)
-                throw new ArgumentOutOfRangeException("", "К сожалению лимит бота исчерпан((");
+                throw new InvalidOperationException("К сожалению лимит бота исчерпан((");
 
             var group = new Group((ulong)chatId, new Platoon());
             groups.Add(group);
@@ -44,7 +47,7 @@ namespace EasyDutyAnnouncementBot.BL.Bot
             return group;
         }
 
-        public static void Init()
+        public static async void Init()
         {
             groups = new List<Group>();
 
@@ -58,18 +61,47 @@ namespace EasyDutyAnnouncementBot.BL.Bot
                 new NextCommand(),
                 new CurrentCommand(),
                 new PushCommand(),
-                new AddListCommand(),
                 new CancelCommand(),
                 new MakeCommand(),
                 new ListCommand(),
                 new TripleDotCommand(),
-                new MakeListCommand(),
                 new SetCommand(),
                 new ExcludeCommand(),
                 new HelpCommand(),
                 new DeleteCommand(),
-                new StartCommand()
+                new StartCommand(),
+                new ForceOneCommand(),
+                new AssociateCommand(),
+                new WhenCommand(),
+                new WhoCommand(),
+                new ChangeCommand()
             };
+
+
+            var avaibleCommands = DutyBot.Commands
+                .Where(c => c.WhoCanExecute.Contains(ChatMemberStatus.Member))
+                .Select(c => c.Name.ToLower());
+
+            var avaibleList = Properties.Resources.Сommands
+                .Split(new char[] { '\n' }, StringSplitOptions.RemoveEmptyEntries)
+                .Where(s => avaibleCommands
+                .Contains(s.Split(new char[] { '-', ' ' }, StringSplitOptions.RemoveEmptyEntries)[0]));
+
+            await Client.SetMyCommandsAsync(
+                avaibleList.Select(s =>
+                {
+                    var commandDescription = s.Split(new char[] { '-' }, StringSplitOptions.RemoveEmptyEntries);
+
+                    if (s.Trim()[0] == '#')
+                        return null;
+
+                    return new BotCommand()
+                    {
+                        Command = commandDescription[0].Trim(),
+                        Description = commandDescription.Length == 2 ? commandDescription[1].Trim() : "нет описания"
+                    };
+                })
+                .Where(bc => bc != null));
 
             Client.StartReceiving();
             Client.OnMessage += OnNewMessage;
@@ -77,7 +109,7 @@ namespace EasyDutyAnnouncementBot.BL.Bot
 
         private const Byte MAX_GROUPS = 3;
 
-        private static async void OnNewMessage(object sender, Telegram.Bot.Args.MessageEventArgs e)
+        private static async void OnNewMessage(object sender, MessageEventArgs e)
         {
             if ((e == null) || (e?.Message == null))
                 return;
@@ -89,6 +121,7 @@ namespace EasyDutyAnnouncementBot.BL.Bot
                 if (message.Text != null)
                 {
                     var group = GetGroupByChatId(message.Chat.Id);
+                    var userId = message.From.Id;
 
                     foreach (var command in Commands)
                     {
@@ -111,18 +144,27 @@ namespace EasyDutyAnnouncementBot.BL.Bot
                             await command.Execute(Client, message);
 
                             if (group != null)
-                                group.LastCommand = command;
+                            {
+                                if (group.LastCommand == null)
+                                    group.LastCommand = new Dictionary<int, Command>();
+
+                                if (group.LastCommand.ContainsKey(userId))
+                                    group.LastCommand[userId] = command;
+                                else
+                                    group.LastCommand.Add(userId, command);
+                            }
+
+                            if (command.LastStatus == CommandStatus.AwaitExecuting)
+                                await (command as ArgCommand).ExecuteWith(Client, message);
 
                             return;
                         }
                     }
 
-                    if (group?.LastCommand?.LastStatus == CommandStatus.AwaitNextMessage)
+                    if (group.LastCommand[userId] is ArgCommand argCommand)
                     {
-                        var argCommand = group.LastCommand as ArgCommand;
-
-                        argCommand.SendData(Client, message);
-
+                        if (argCommand.LastStatus == CommandStatus.AwaitNextMessage)
+                            await argCommand.SendData(Client, message);
                         if (argCommand.LastStatus == CommandStatus.AwaitExecuting)
                             await argCommand.ExecuteWith(Client, message);
                     }

@@ -1,18 +1,18 @@
 ﻿using System;
+using System.Linq;
 using System.Threading.Tasks;
 using Telegram.Bot;
 using Telegram.Bot.Types;
-using Telegram.Bot.Types.Enums;
 
 
 namespace EasyDutyAnnouncementBot.BL.Bot.Commands
 {
-    class MakeCommand : TextArgCommand
+    class MakeCommand : TextListArgCommand
     {
         public async override Task Execute(TelegramBotClient client, Message message)
         {
             await client.SendTextMessageAsync(message.Chat.Id,
-                "Введите фамилию и имя студента:");
+                "Пришли список в формате \"Фамилия Имя\" тех, кого нужно добавить)");
             LastStatus = CommandStatus.AwaitNextMessage;
         }
 
@@ -24,9 +24,38 @@ namespace EasyDutyAnnouncementBot.BL.Bot.Commands
             if (platoon == null)
                 throw new InvalidIdException("Взаимодействие с данной группой не было инициировано.");
 
-            var student = platoon.CreateStudent(_surname, _name);
+            try
+            {
+                foreach (var user in DataList)
+                {
+                    var splitData = user.Trim().Split(' ');
 
-            await client.SendTextMessageAsync(message.Chat.Id, $"Студент {student} был добавлен в список.");
+                    if (splitData.Length != 2)
+                    {
+                        await client.SendTextMessageAsync(message.Chat.Id,
+                        "Пришли список в формате \"Фамилия Имя\" тех, кого нужно добавить)");
+                        LastStatus = CommandStatus.AwaitNextMessage;
+                        return;
+                    }
+
+                    var student = platoon.CreateStudent(splitData[0], splitData[1]);
+                }
+            }
+            catch (Exception ex)
+            {
+                await client.SendTextMessageAsync(message.Chat.Id,
+                    ex.Message);
+
+                LastStatus = CommandStatus.Failure;
+                return;
+            }
+
+
+            await client.SendTextMessageAsync(message.Chat.Id,
+                "Список студентов обновлён, теперь он выглядит так:");
+            await DutyBot.Commands.Single(
+                c => c.GetType() == typeof(ListCommand))
+                .Execute(client, message);
 
             LastStatus = CommandStatus.Success;
         }
@@ -34,58 +63,10 @@ namespace EasyDutyAnnouncementBot.BL.Bot.Commands
         public async override Task OnTextDataError(TelegramBotClient client, Message message)
         {
             await client.SendTextMessageAsync(message.Chat.Id,
-                   "В качестве студента можно отправить только текст в формате \"Фамилия Имя\".");
+               "В качестве списка можно прислать только текстовое сообщения, " +
+               "разделяя их при помощи пробела, запятой или новой строки.");
+
             LastStatus = CommandStatus.AwaitNextMessage;
         }
-
-        public async override Task OnTextData(TelegramBotClient client, Message message)
-        {
-            var surnameName = Data
-                .Trim()
-                .Split(new char[] { ' ' },
-                StringSplitOptions.RemoveEmptyEntries);
-
-            if (surnameName.Length != 2)
-            {
-                await client.SendTextMessageAsync(message.Chat.Id,
-                   "В качестве студента можно отправить только текст в формате \"Фамилия Имя\".");
-                return;
-            }
-
-            _surname = surnameName[0];
-            _name = surnameName[1];
-
-            LastStatus = CommandStatus.AwaitExecuting;
-        }
-
-        public async override Task TakeData(TelegramBotClient client, Message message)
-        {
-            if ((message.Type != MessageType.Text) || string.IsNullOrWhiteSpace(message?.Text))
-            {
-
-                return;
-            }
-
-            var surnameName = message.Text
-                .Trim()
-                .Split(new char[] { ' ' },
-                StringSplitOptions.RemoveEmptyEntries);
-
-            if (surnameName.Length != 2)
-            {
-                await client.SendTextMessageAsync(message.Chat.Id,
-                   "В качестве студента можно отправить только текст в формате \"Фамилия Имя\".");
-                return;
-            }
-
-            _surname = surnameName[0];
-            _name = surnameName[1];
-
-
-            LastStatus = CommandStatus.AwaitExecuting;
-        }
-
-        private string _surname = null;
-        private string _name = null;
     }
 }
