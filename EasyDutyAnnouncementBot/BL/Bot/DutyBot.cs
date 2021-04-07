@@ -123,6 +123,15 @@ namespace EasyDutyAnnouncementBot.BL.Bot
                     var group = GetGroupByChatId(message.Chat.Id);
                     var userId = message.From.Id;
 
+                    if (group != null)
+                    {
+                        if (group.LastCommand == null)
+                            group.LastCommand = new Dictionary<int, Command>();
+
+                        if (!group.LastCommand.ContainsKey(userId))
+                            group.LastCommand.Add(userId, null);
+                    }
+
                     foreach (var command in Commands)
                     {
                         if (command.RecognizeSelf(message.Text))
